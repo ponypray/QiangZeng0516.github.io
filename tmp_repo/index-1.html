@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QIANG ZENG | AIGC Portfolio</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Space Grotesk', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            black: '#030303',
+                            dark: '#0A0A0A',
+                            gray: '#888888',
+                            cyan: '#00F2FF',
+                        }
+                    },
+                    animation: {
+                        'pulse-glow': 'pulse-glow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'typewriter': 'blink 1s step-end infinite',
+                        'scan': 'scan 0.8s ease-in-out', 
+                        'spin-slow': 'spin 10s linear infinite',
+                        'suck-in': 'suckIn 1.5s ease-in forwards',
+                        'float-1': 'float 6s ease-in-out infinite',
+                        'float-2': 'float 7s ease-in-out infinite 1s',
+                        'float-3': 'float 8s ease-in-out infinite 2s',
+                        'drift': 'drift 10s linear forwards',
+                    },
+                    keyframes: {
+                        'pulse-glow': {
+                            '0%, 100%': { opacity: '1', boxShadow: '0 0 10px rgba(0, 242, 255, 0.2)' },
+                            '50%': { opacity: '0.6', boxShadow: '0 0 20px rgba(0, 242, 255, 0.6)' }
+                        },
+                        'blink': {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0' }
+                        },
+                        'scan': {
+                            '0%': { transform: 'translateX(-150%) skewX(-20deg)' },
+                            '100%': { transform: 'translateX(250%) skewX(-20deg)' }
+                        },
+                        'float': {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        },
+                        'drift': {
+                            '0%': { transform: 'translate(-50%, -50%) scale(0.8) rotate(0deg)', opacity: '0' },
+                            '10%': { opacity: '1', transform: 'translate(-50%, -50%) scale(1) rotate(5deg)' },
+                            '90%': { opacity: '0.8', transform: 'translate(-50%, -60%) scale(0.5) rotate(45deg)' },
+                            '100%': { transform: 'translate(-50%, -80%) scale(0) rotate(180deg)', opacity: '0' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --mouse-x: 50%;
+            --mouse-y: 50%;
+        }
+
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            overflow-x: hidden;
+            margin: 0;
+            cursor: default;
+        }
+
+        /* Utilities */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00F2FF; }
+        
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .glass-card {
+            background: rgba(15, 15, 15, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .card-overflow-hidden {
+            overflow: hidden;
+        }
+
+        /* Scan Effect - FORCE VISIBILITY */
+        .scan-shine {
+            position: relative;
+            overflow: hidden;
+        }
+        .scan-shine::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100px;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transform: translateX(-200%) skewX(-20deg);
+            pointer-events: none;
+            z-index: 20;
+            opacity: 0.5;
+        }
+        .scan-shine:hover::after {
+            animation: scan 0.7s ease-in-out forwards;
+        }
+
+        /* Carousel */
+        .carousel-card {
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease, filter 0.5s ease;
+            filter: grayscale(100%);
+            opacity: 0.4;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+        .carousel-card.is-center {
+            filter: grayscale(0%);
+            opacity: 1;
+            box-shadow: 0 0 40px rgba(0, 242, 255, 0.15);
+            z-index: 50 !important;
+        }
+
+        /* Glow Effects */
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(400px circle at var(--card-mouse-x, 50%) var(--card-mouse-y, 50%), rgba(0, 242, 255, 0.1), transparent 40%);
+            opacity: 0; transition: opacity 0.3s;
+            pointer-events: none; z-index: 1;
+        }
+        .glass-card:hover::before { opacity: 1; }
+
+        .global-glow {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 1;
+            background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(0, 242, 255, 0.03), transparent 80%);
+        }
+
+        .cursor-blink {
+            display: inline-block; width: 2px; height: 1em; background: #00F2FF;
+            margin-left: 4px; vertical-align: bottom; animation: blink 1s infinite;
+        }
+
+        .dynamic-island {
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Black Hole Animation */
+        .black-hole-spin { animation: spin-slow 20s linear infinite; }
+        
+        /* Floating Message in Black Hole */
+        .message-particle {
+            position: absolute;
+            color: rgba(0, 242, 255, 0.9);
+            font-family: 'Space Grotesk', monospace;
+            font-size: 11px;
+            pointer-events: none;
+            white-space: nowrap;
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+            animation: drift 10s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            z-index: 15;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+
+        /* Skill Bar Animation Class */
+        .skill-fill-anim {
+            transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "path": "https://esm.sh/path@^0.12.7",
+    "url": "https://esm.sh/url@^0.11.4",
+    "vite": "https://esm.sh/vite@^7.3.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+  }
+}
+</script>
+</head>
+<body class="antialiased selection:bg-brand-cyan selection:text-black">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+</body>
+</html>
