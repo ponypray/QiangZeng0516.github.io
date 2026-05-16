@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QIANG ZENG | AIGC Portfolio</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Space Grotesk', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            black: '#030303',
+                            dark: '#0A0A0A',
+                            gray: '#888888',
+                            cyan: '#00F2FF',
+                        }
+                    },
+                    animation: {
+                        'pulse-glow': 'pulse-glow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'typewriter': 'blink 1s step-end infinite',
+                        'scan': 'scan 0.8s ease-in-out', 
+                        'spin-slow': 'spin 10s linear infinite',
+                        'suck-in': 'suckIn 1.5s ease-in forwards',
+                        'float-1': 'float 6s ease-in-out infinite',
+                        'float-2': 'float 7s ease-in-out infinite 1s',
+                        'float-3': 'float 8s ease-in-out infinite 2s',
+                        'drift': 'drift 10s linear forwards',
+                    },
+                    keyframes: {
+                        'pulse-glow': {
+                            '0%, 100%': { opacity: '1', boxShadow: '0 0 10px rgba(0, 242, 255, 0.2)' },
+                            '50%': { opacity: '0.6', boxShadow: '0 0 20px rgba(0, 242, 255, 0.6)' }
+                        },
+                        'blink': {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0' }
+                        },
+                        'scan': {
+                            '0%': { transform: 'translateX(-150%) skewX(-20deg)' },
+                            '100%': { transform: 'translateX(250%) skewX(-20deg)' }
+                        },
+                        'float': {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        },
+                        'drift': {
+                            '0%': { transform: 'translate(-50%, -50%) scale(0.8) rotate(0deg)', opacity: '0' },
+                            '10%': { opacity: '1', transform: 'translate(-50%, -50%) scale(1) rotate(5deg)' },
+                            '90%': { opacity: '0.8', transform: 'translate(-50%, -60%) scale(0.5) rotate(45deg)' },
+                            '100%': { transform: 'translate(-50%, -80%) scale(0) rotate(180deg)', opacity: '0' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --mouse-x: 50%;
+            --mouse-y: 50%;
+        }
+
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            overflow-x: hidden;
+            margin: 0;
+            cursor: default;
+        }
+
+        /* Utilities */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00F2FF; }
+        
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .glass-card {
+            background: rgba(15, 15, 15, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .card-overflow-hidden {
+            overflow: hidden;
+        }
+
+        /* Scan Effect - FORCE VISIBILITY */
+        .scan-shine {
+            position: relative;
+            overflow: hidden;
+        }
+        .scan-shine::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100px;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transform: translateX(-200%) skewX(-20deg);
+            pointer-events: none;
+            z-index: 20;
+            opacity: 0.5;
+        }
+        .scan-shine:hover::after {
+            animation: scan 0.7s ease-in-out forwards;
+        }
+
+        /* Hero Name Gradient: TL White -> BR Light Gray (More pronounced) */
+        .text-gradient-hero {
+            background: linear-gradient(135deg, #FFFFFF 20%, #E5E7EB 50%, #9CA3AF 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Carousel */
+        .carousel-card {
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease, filter 0.5s ease;
+            filter: grayscale(100%);
+            opacity: 0.4;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+        .carousel-card.is-center {
+            filter: grayscale(0%);
+            opacity: 1;
+            box-shadow: 0 0 40px rgba(0, 242, 255, 0.15);
+            z-index: 50 !important;
+        }
+
+        /* Glow Effects */
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(400px circle at var(--card-mouse-x, 50%) var(--card-mouse-y, 50%), rgba(0, 242, 255, 0.1), transparent 40%);
+            opacity: 0; transition: opacity 0.3s;
+            pointer-events: none; z-index: 1;
+        }
+        .glass-card:hover::before { opacity: 1; }
+
+        .global-glow {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 1;
+            background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(0, 242, 255, 0.03), transparent 80%);
+        }
+
+        .cursor-blink {
+            display: inline-block; width: 2px; height: 1em; background: #00F2FF;
+            margin-left: 4px; vertical-align: bottom; animation: blink 1s infinite;
+        }
+
+        .dynamic-island {
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Black Hole Animation */
+        .black-hole-spin { animation: spin-slow 20s linear infinite; }
+        
+        /* Floating Message in Black Hole */
+        .message-particle {
+            position: absolute;
+            color: rgba(0, 242, 255, 0.9);
+            font-family: 'Space Grotesk', monospace;
+            font-size: 11px;
+            pointer-events: none;
+            white-space: nowrap;
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+            animation: drift 10s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            z-index: 15;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+
+        /* Skill Bar Animation Class */
+        .skill-fill-anim {
+            transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "path": "https://esm.sh/path@^0.12.7",
+    "url": "https://esm.sh/url@^0.11.4",
+    "vite": "https://esm.sh/vite@^7.3.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="antialiased selection:bg-brand-cyan selection:text-black">
+
+    <!-- Background Canvas -->
+    <canvas id="bg-canvas" class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none" style="background: black; z-index: -1;"></canvas>
+    <div class="global-glow"></div>
+
+    <!-- Language Toggle (Capsule Style) -->
+    <button id="lang-toggle" class="fixed top-8 right-8 z-50 glass-card px-4 py-1.5 rounded-full border-brand-cyan/20 animate-pulse-glow hover:scale-105 transition-transform cursor-pointer flex items-center justify-center scan-shine card-overflow-hidden">
+        <span class="text-[10px] font-mono tracking-widest text-brand-cyan font-bold uppercase" id="lang-text">EN</span>
+    </button>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="fixed bottom-8 right-8 z-50 glass-card w-12 h-12 rounded-full border-brand-cyan/30 flex items-center justify-center text-brand-cyan hover:bg-brand-cyan hover:text-black transition-all duration-300 opacity-0 pointer-events-none translate-y-10 group shadow-[0_0_15px_rgba(0,242,255,0.2)]">
+        <svg class="w-5 h-5 group-hover:-translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+    </button>
+
+    <!-- Main Content -->
+    <div id="main-content" class="relative z-10 max-w-[1400px] mx-auto px-6 py-24 transition-opacity duration-500">
+        
+        <!-- Navbar (Removed Awards) -->
+        <nav class="fixed top-6 left-1/2 -translate-x-1/2 z-40 flex justify-center w-full max-w-[90vw]">
+            <div class="dynamic-island px-4 py-2 rounded-full flex gap-4 text-[10px] font-mono font-bold text-gray-400 overflow-x-auto scrollbar-hide">
+                <a href="#hero" class="hover:text-white transition-colors whitespace-nowrap">Pony</a>
+                <a href="#core" class="hover:text-white transition-colors whitespace-nowrap" data-cn="个人" data-en="CORE">个人</a>
+                <a href="#skill" class="hover:text-white transition-colors whitespace-nowrap" data-cn="技能" data-en="SKILL">技能</a>
+                <a href="#exp" class="hover:text-white transition-colors whitespace-nowrap" data-cn="经历" data-en="EXP">经历</a>
+                <a href="#work" class="hover:text-white transition-colors whitespace-nowrap" data-cn="作品" data-en="WORK">作品</a>
+                <a href="#contact" class="text-brand-cyan/80 hover:text-brand-cyan transition-colors whitespace-nowrap" data-cn="联系" data-en="LINK">联系</a>
+            </div>
+        </nav>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+            
+            <!-- Hero Section -->
+            <section id="hero" class="md:col-span-12 flex justify-center mb-16 animate-float-1">
+                <div class="glass-card card-overflow-hidden p-12 rounded-3xl text-center max-w-3xl border-white/5 w-full scan-shine">
+                    <!-- Avatar with Hover Effect -->
+                    <div class="relative w-40 h-40 mx-auto mb-8 rounded-full overflow-hidden border border-white/10 group cursor-pointer transition-all duration-500 hover:border-brand-cyan/50 hover:shadow-[0_0_30px_rgba(0,242,255,0.3)]">
+                        <img src="https://i.ibb.co/Q7y4ctpJ/image.png" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Profile">
+                        <div class="absolute bottom-2 right-2 w-4 h-4 bg-green-500 rounded-full border-2 border-black animate-pulse"></div>
+                    </div>
+                    <!-- Updated Text Gradient: Top-Left White -> Bottom-Right Light Gray -->
+                    <h1 class="text-6xl font-bold font-mono text-white mb-2 tracking-tight" id="hero-name">曾 强</h1>
+                    <div class="h-6 mb-4 flex items-center justify-center">
+                        <span id="typewriter-text" class="text-brand-cyan font-mono text-sm tracking-widest uppercase"></span>
+                        <span class="cursor-blink"></span>
+                    </div>
+                    <p class="text-gray-400 font-mono text-sm max-w-xl mx-auto" id="hero-desc">以工业级的严谨，重构 AI 时代的视觉叙事。</p>
+                </div>
+            </section>
+
+            <!-- Core / Summary -->
+            <div id="core" class="md:col-span-8 glass-card card-overflow-hidden p-8 rounded-2xl animate-float-2 scroll-mt-24 grayscale hover:grayscale-0 transition-all duration-500 relative scan-shine">
+                <div class="absolute top-0 right-0 p-8 opacity-20 text-brand-cyan">
+                     <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                </div>
+                <h3 class="text-2xl font-mono text-white mb-4 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-brand-cyan/10 flex items-center justify-center border border-brand-cyan/30 shadow-[0_0_10px_rgba(0,242,255,0.2)]">
+                        <svg class="w-4 h-4 text-brand-cyan" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                        </svg>
+                    </div>
+                    <span id="core-title">个人总结</span>
+                </h3>
+                <p class="text-gray-400 text-sm leading-loose" id="core-text">
+                    拥有 12 年+ <span class="text-brand-cyan font-bold">全链路影像制作与营销经验</span>，曾深耕广电及新能源汽车赛道。作为一名<span class="text-brand-cyan font-bold">"视觉工程师"</span>，我精通从商业脚本、拍摄执导到后期特效的全流程管理，并擅长利用数据驱动策略打造病毒式内容。现专注于 <span class="text-brand-cyan font-bold">AIGC 企业级落地</span> 与 <span class="text-brand-cyan font-bold">AI+视频自动化工作流构建</span>，致力于用技术实现视觉审美的<span class="text-brand-cyan font-bold">极致降本增效</span>。
+                </p>
+            </div>
+
+            <!-- Stats -->
+            <div class="md:col-span-4 glass-card card-overflow-hidden p-8 rounded-2xl flex flex-col justify-center items-center text-center relative scan-shine grayscale hover:grayscale-0 transition-all duration-500 animate-float-3">
+                 <div class="absolute inset-0 bg-gradient-to-br from-brand-cyan/10 to-transparent opacity-50"></div>
+                <h2 class="text-5xl font-mono font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-brand-cyan mb-2">100M+</h2>
+                <p class="text-[10px] font-mono text-gray-400 uppercase tracking-[0.2em]" id="stats-text">全网播放量破亿</p>
+                <div class="mt-4 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] text-gray-500">VIRAL CREATOR</div>
+            </div>
+
+            <!-- Skills -->
+            <div id="skill" class="md:col-span-12 glass-card card-overflow-hidden p-8 rounded-2xl scroll-mt-24 grayscale hover:grayscale-0 transition-all duration-500 scan-shine group/skill animate-float-1">
+                <div class="flex justify-between items-center mb-8">
+                    <h3 class="text-lg font-mono text-white" id="title-skill">技能</h3>
+                    <span class="text-[10px] text-gray-600 font-mono">02 / TECH</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6" id="skills-container">
+                    <!-- Skills Injected via JS -->
+                </div>
+            </div>
+
+            <!-- Experience -->
+            <div id="exp" class="md:col-span-7 glass-card card-overflow-hidden p-8 rounded-2xl scroll-mt-24 grayscale hover:grayscale-0 transition-all duration-500 boolean-pattern relative scan-shine animate-float-2">
+                <div class="flex justify-between items-center mb-6 relative z-10">
+                    <h3 class="text-lg font-mono text-white" id="title-exp">经历</h3>
+                    <button id="exp-toggle-all" class="text-[10px] font-mono text-brand-cyan border border-brand-cyan/30 px-3 py-1 rounded hover:bg-brand-cyan/10 transition-colors">
+                        展开全部
+                    </button>
+                </div>
+                <div class="space-y-4 relative z-10" id="experience-container">
+                    <!-- Experience Injected via JS -->
+                </div>
+            </div>
+
+            <!-- Education & Awards -->
+            <div id="awards" class="md:col-span-5 glass-card card-overflow-hidden p-8 rounded-2xl flex flex-col relative scroll-mt-24 grayscale hover:grayscale-0 transition-all duration-500 scan-shine animate-float-3">
+                <div class="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+                    <svg class="w-24 h-24 text-brand-cyan" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                </div>
+                <div class="z-10 h-full flex flex-col">
+                    <h3 class="text-lg font-mono text-white mb-6" id="title-awards">荣誉 & 奖项</h3>
+                    <div class="flex-grow space-y-4 overflow-y-auto max-h-[400px] scrollbar-hide pr-1" id="awards-list">
+                        <!-- Dynamic Awards Content -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3D Carousel Work -->
+            <div id="work" class="md:col-span-12 relative w-full py-12 group/carousel select-none scroll-mt-24 grayscale hover:grayscale-0 transition-all duration-500 animate-float-1">
+                <div class="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-black to-transparent z-20 pointer-events-none"></div>
+                <div class="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-black to-transparent z-20 pointer-events-none"></div>
+                
+                <div id="carousel-container" class="flex gap-8 overflow-x-auto py-10 px-[40%] scrollbar-hide cursor-grab">
+                    <!-- Work Items Injected via JS -->
+                </div>
+                
+                <div id="carousel-dots" class="flex justify-center gap-2 mt-4 px-4 py-2 cursor-pointer z-30 relative">
+                    <!-- Dots Injected via JS -->
+                </div>
+            </div>
+
+            <!-- Contact -->
+            <div id="contact" class="md:col-span-5 glass-card p-8 rounded-2xl relative scroll-mt-24 grayscale hover:grayscale-0 transition-all duration-500 flex flex-col justify-center animate-float-2 scan-shine">
+                <div class="absolute top-4 left-4 text-[10px] font-mono text-gray-500" id="label-contact">联系</div>
+                
+                <div class="grid grid-cols-1 gap-8 mt-6">
+                    <!-- Email -->
+                    <div class="relative group/email">
+                        <button onclick="toggleEmail()" class="w-full py-5 rounded-xl border border-gray-800 text-xs font-mono uppercase text-gray-400 hover:border-brand-cyan hover:text-brand-cyan hover:bg-brand-cyan/5 transition-all flex items-center justify-center gap-3 bg-black/40 shadow-lg">
+                            <span class="tracking-widest">EMAIL ME</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeWidth="1.5"></path></svg>
+                        </button>
+                        <div id="email-popup" class="hidden absolute bottom-full left-0 w-full mb-3 bg-black/95 border border-brand-cyan/20 p-5 rounded-xl backdrop-blur-xl z-50 text-[10px] font-mono animate-in zoom-in fade-in shadow-[0_0_30px_rgba(0,0,0,0.9)]">
+                            <div class="flex justify-between items-center mb-4 text-gray-400 group/item hover:text-white transition-colors border-b border-gray-800 pb-2">
+                                <span>海外 - zengqiang5@gmail.com</span>
+                                <button onclick="copyText('zengqiang5@gmail.com', this)" class="text-brand-cyan hover:scale-110 transition-transform p-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                </button>
+                            </div>
+                            <div class="flex justify-between items-center text-gray-400 group/item hover:text-white transition-colors">
+                                <span>国内 - ponydawu@qq.com</span>
+                                <button onclick="copyText('ponydawu@qq.com', this)" class="text-brand-cyan hover:scale-110 transition-transform p-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- WeChat -->
+                    <div class="relative group/wechat">
+                        <button class="w-full py-5 rounded-xl border border-gray-800 text-xs font-mono uppercase text-gray-400 hover:border-green-500 hover:text-green-500 hover:bg-green-500/5 transition-all flex items-center justify-center gap-3 bg-black/40 shadow-lg">
+                            <span class="tracking-widest">WECHAT</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" strokeWidth="1.5"></path></svg>
+                        </button>
+                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-48 rounded-xl z-50 hidden group-hover/wechat:block animate-in zoom-in fade-in overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.9)]">
+                            <img src="https://i.ibb.co/jkGzR2pV/20251220134418-115-75.jpg" class="w-full h-auto scale-105 block">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guestbook (Updated: No Border, Random Particles) -->
+            <div class="md:col-span-7">
+                <div class="glass-card card-overflow-hidden h-full rounded-xl flex flex-col justify-center items-center group relative min-h-[400px] scan-shine animate-float-3 overflow-hidden" id="blackhole-container">
+                     <!-- Black Hole Visual -->
+                     <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                         <!-- Core -->
+                         <div class="w-[250px] h-[250px] rounded-full bg-black shadow-[0_0_50px_rgba(255,255,255,0.05),inset_0_0_80px_rgba(0,0,0,1)] z-10"></div>
+                         <!-- Accretion Disks -->
+                         <div class="absolute w-[450px] h-[450px] rounded-full bg-[conic-gradient(from_0deg,transparent,rgba(255,255,255,0.1),rgba(255,255,255,0.2),transparent)] black-hole-spin z-0 opacity-40 blur-xl"></div>
+                         <div class="absolute w-[400px] h-[400px] rounded-full bg-[conic-gradient(from_180deg,transparent,rgba(0,242,255,0.2),rgba(0,242,255,0.05),transparent)] black-hole-spin z-0 opacity-50 mix-blend-screen" style="animation-duration: 15s;"></div>
+                     </div>
+                     
+                     <!-- Particle Container -->
+                     <div id="particle-container" class="absolute inset-0 pointer-events-none z-10 overflow-hidden"></div>
+
+                     <div class="relative z-20 w-full px-12 flex flex-col items-center">
+                        <div id="blackhole-message-area" class="text-center mb-8 h-8">
+                             <h3 class="text-white font-mono text-lg leading-none tracking-[0.2em] uppercase" id="gb-status">EVENT HORIZON</h3>
+                        </div>
+                        
+                        <div class="w-full max-w-md relative group/input">
+                            <input type="text" id="guestbook-input" 
+                                class="w-full bg-black/60 border border-white/10 rounded-full px-6 py-4 text-center text-xs font-mono text-brand-cyan placeholder-gray-600 outline-none focus:border-brand-cyan/50 focus:shadow-[0_0_20px_rgba(0,242,255,0.1)] transition-all backdrop-blur-md"
+                                placeholder="// 发送信号至奇点..."
+                                autocomplete="off"
+                            >
+                            <button onclick="sendToBlackHole()" class="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-500 hover:text-white transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </button>
+                        </div>
+                     </div>
+                </div>
+            </div>
+
+        </div>
+
+        <footer class="mt-32 text-center text-[10px] font-mono text-gray-700 tracking-[0.5em] uppercase">
+            QIANG ZENG © 2025 ALL RIGHTS RESERVED
+        </footer>
+    </div>
+
+    <!-- Second Page (Center Layout) -->
+    <div id="second-page" class="hidden relative z-10 w-full min-h-screen max-w-[1400px] mx-auto px-6 py-32">
+        <button onclick="togglePage('home')" class="fixed top-8 left-8 z-50 glass-card px-4 py-2 rounded-full border border-white/10 text-xs font-mono text-brand-cyan flex items-center gap-2 hover:bg-white/5 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18" strokeWidth="2"></path></svg>
+            BACK
+        </button>
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-mono font-bold tracking-[0.3em] text-white">SECOND HORIZON</h2>
+            <h2 class="text-2xl font-mono font-light tracking-[0.5em] text-gray-400 mt-2">第二视界</h2>
+            <p class="text-gray-500 font-mono text-xs mt-4">Exploring the unseen narratives through AIGC | 探索 AIGC 叙事的未至之境</p>
+        </div>
+        <!-- Centered Masonry Grid -->
+        <div id="gallery-grid" class="columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6 mx-auto max-w-[1200px]">
+            <!-- Images Injected -->
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const LANG = {
+            cn: {
+                heroName: '曾 强',
+                heroTypewriter: 'AIGC 视觉专家 | 视频导演',
+                heroDesc: '以工业级的严谨，重构 AI 时代的视觉叙事。',
+                coreTitle: '个人总结',
+                coreText: `拥有 12 年+ <span class="text-brand-cyan font-bold">全链路影像制作与营销经验</span>，曾深耕广电及新能源汽车赛道。作为一名<span class="text-brand-cyan font-bold">"视觉工程师"</span>，我精通从商业脚本、拍摄执导到后期特效的全流程管理，并擅长利用数据驱动策略打造病毒式内容。现专注于 <span class="text-brand-cyan font-bold">AIGC 企业级落地</span> 与 <span class="text-brand-cyan font-bold">AI+视频自动化工作流构建</span>，致力于用技术实现视觉审美的<span class="text-brand-cyan font-bold">极致降本增效</span>。`,
+                statsText: '全网播放量破亿',
+                expToggle: '[ 展开全部 ]',
+                expToggleFold: '[ 收起全部 ]',
+                gbPlaceholder: '// 发送信号至奇点...',
+                toggle: 'EN',
+                labelSkill: '技能',
+                labelExp: '经历',
+                labelAwards: '荣誉 & 奖项',
+                labelContact: '联系'
+            },
+            en: {
+                heroName: 'QIANG ZENG',
+                heroTypewriter: 'AIGC VISUAL EXPERT | DIRECTOR',
+                heroDesc: 'Restructuring visual narratives in the AI Era with industrial rigor.',
+                coreTitle: 'Summary',
+                coreText: '12+ years of full-stack visual production & marketing experience. Expert in TV broadcasting & NEV sectors. Visual Engineer mastering the full pipeline from commercial scripts to VFX. Focused on enterprise AIGC implementation & AI-driven video automation workflows.',
+                statsText: 'TOTAL VIEWS WORLDWIDE',
+                expToggle: '[ EXPAND ALL ]',
+                expToggleFold: '[ FOLD ALL ]',
+                gbPlaceholder: '// Send signal to singularity...',
+                toggle: '中文',
+                labelSkill: 'SKILLS',
+                labelExp: 'EXPERIENCE',
+                labelAwards: 'HONORS & AWARDS',
+                labelContact: 'CONTACT'
+            }
+        };
+
+        const awardsData = [
+            {
+                titleCn: 'LiblibAI 认证“Lib原创者”',
+                titleEn: 'LiblibAI Certified Creator',
+                descCn: 'AIGC 头部平台认证',
+                descEn: 'Top AIGC Platform Certification'
+            },
+            {
+                titleCn: '新片场签约创作人',
+                titleEn: 'Xinpianchang Signed Creator',
+                descCn: '国内顶尖影视创作社区',
+                descEn: 'Top Video Creator Community'
+            },
+            {
+                titleCn: '网易 / 抖音认证音乐人',
+                titleEn: 'NetEase / TikTok Musician',
+                descCn: '具备专业作曲与配乐能力',
+                descEn: 'Professional Composition & Scoring'
+            },
+            {
+                titleCn: '最佳作品奖 - 金海棠奖',
+                titleEn: 'Best Work - Golden Begonia',
+                descCn: '第二届亚洲微电影大赛《爱心驿站》',
+                descEn: '2nd Asian Micro-film Contest'
+            },
+            {
+                titleCn: '金奖 - 浙江青年微电影大赛',
+                titleEn: 'Gold Award - Youth Contest',
+                descCn: '第二届中国(浙江)青年微电影大赛《爱心驿站》',
+                descEn: '2nd Zhejiang Youth Micro-film Contest'
+            },
+            {
+                titleCn: '最佳编剧奖 - 映山红大赛',
+                titleEn: 'Best Screenplay - Azalea',
+                descCn: '第三届“映山红”微电影大赛',
+                descEn: '3rd Azalea Micro-film Contest'
+            }
+        ];
+
+        const experienceData = [
+            { id: 'exp1', companyCn: '吉利汽车研究院 (Geely Auto)', companyEn: 'Geely Auto Research Institute', titleCn: '大数据产品策划主管工程师', titleEn: 'Big Data Product Planning Supervisor', period: '2025.03 - PRESENT', descCn: ['核心职责：负责 AIGC 技术在品牌营销端的落地应用，搭建智能化内容生产管线。', 'AIGC 工作流架构设计：主导开发企业级 AI 模型及工具，部署 AI 数字人与自动化脚本，实现广告视频规模化生产。', 'AI 创意矩阵构建：利用 Gemini, Runway, Midjourney 等工具批量产出高视觉冲击力创意视频。', '技术赋能营销：推动从“传统拍摄”向“智能生成”转型。'], descEn: ['Core Responsibility: Lead the application of AIGC technology in brand marketing.', 'AIGC Workflow Design: Led development of enterprise AI models/tools, deployed AI Digital Humans.', 'AI Creative Matrix: Utilized Gemini, Runway, Midjourney for mass-production of high-impact videos.', 'Tech-Driven Marketing: Drove the transition to intelligent generation.'] },
+            { id: 'exp2', companyCn: '吉利雷达 (Geely Radar)', companyEn: 'Geely Radar', titleCn: '视觉内容专家 & 导演', titleEn: 'Visual Content Expert & Director', period: '2023.03 - 2025.03', descCn: ['品牌视觉定义：主导策划拍摄《超级皮卡》系列视频。', '高端用户叙事：负责用户纪录片制作，挖掘情感，提升品牌人文温度。', '全案执行与品控：作为导演/摄影/剪辑核心主创，统筹跨部门协作。'], descEn: ['Brand Visual Identity: Led the "Super Pickup" campaign.', 'User Storytelling: Produced user documentaries to mine emotional connections.', 'Execution & Quality Control: Served as lead Director/DP/Editor.'] },
+            { id: 'exp3', companyCn: '中天模型 (Zhongtian Models)', companyEn: 'Zhongtian Models', titleCn: '新媒体内容运营经理', titleEn: 'New Media Content Operation Manager', period: '2021.08 - 2023.02', descCn: ['增长黑客：全权负责官方抖音账号运营，单平台单月涨粉 1.7W+。', '产品内容化：将硬核产品说明转化为高互动创意视频。'], descEn: ['Growth Hacking: Managed official TikTok (Douyin) accounts with significant follower growth.', 'Product Contentization: Transformed hardcore product specs into interactive videos.'] },
+            { id: 'exp4', companyCn: '零跑汽车 (Leapmotor)', companyEn: 'Leapmotor', titleCn: '视觉传播主管', titleEn: 'Visual Communication Supervisor', period: '2018.03 - 2021.02', descCn: ['爆款事件营销：ChinaJoy 期间策划现场短视频，抖音斩获 12万+ 播放。', '供应商管理与 QC：把控 TVC 及 UGC 内容质量。'], descEn: ['Viral Event Marketing: Planned on-site short videos during ChinaJoy.', 'Supplier Management & QC: Controlled quality for TVC and UGC content.'] },
+            { id: 'exp5', companyCn: '早期经历 (浙江文广 / 一典文化)', companyEn: 'Early Career (ZMG / Yidian)', titleCn: '核心主创 / 广电编导', titleEn: 'Core Creator / TV Director', period: '2013.02 - 2018.03', descCn: ['代表作《完美男人——入殓师》实现全网播放量破亿。', '为“弹个车”制作广告片单日播放超 42 万。'], descEn: ['Representative work "The Perfect Man" achieved 100M+ views.', 'Created ads for "Tan Ge Che" with high daily engagement.'] }
+        ];
+
+        const skillsData = [
+            { name: 'Runway Gen-2/3 & Kling AI', level: 98, highlight: true },
+            { name: 'Midjourney & Stable Diffusion', level: 95, highlight: true },
+            { name: 'Google Gemini & LLMs', level: 90, highlight: false },
+            { name: 'Premiere / AE / CapCut', level: 98, highlight: false },
+            { name: 'Sony CineLine / Ronin / DJI FPV', level: 94, highlight: false },
+            { name: 'Unreal Engine 5 & C4D', level: 80, highlight: false }
+        ];
+
+        const workItems = [
+            { id: 'p35X-kv1ek4', titleCn: '极氪009光辉版AIGC视频', titleEn: 'ZEEKR 009 AIGC', statsCn: 'AIGC 全流程', statsEn: 'AIGC Full Process' },
+            { id: 'fMoDHmxzzM4', titleCn: '极氪009喜马拉雅篇', titleEn: 'ZEEKR 009 Himalaya', statsCn: 'AIGC 自动化', statsEn: 'AIGC Workflow' },
+            { id: '817C7H8Tjm8', titleCn: '吉利银河A7', titleEn: 'Geely Galaxy A7', statsCn: '探索之旅', statsEn: 'Journey Within' },
+            { id: 'HHsxlZnsQv8', titleCn: '商业视觉项目 I', titleEn: 'Commercial Visual I', statsCn: '全流程主创', statsEn: 'Full Creator' },
+            { id: 'cf46s1C6Wfo', titleCn: '商业视觉项目 II', titleEn: 'Commercial Visual II', statsCn: '导演/摄影', statsEn: 'Dir/DP' },
+            { id: 'XjO9hTzDBWY', titleCn: '商业视觉项目 III', titleEn: 'Commercial Visual III', statsCn: '策划执行', statsEn: 'Planning & Exec' },
+            { id: 'Lafpc0y6eQ0', titleCn: '商业视觉项目 IV', titleEn: 'Commercial Visual IV', statsCn: '视觉叙事', statsEn: 'Storytelling' },
+            { id: 'Vbm-42Z7gEk', titleCn: '商业视觉项目 V', titleEn: 'Commercial Visual V', statsCn: '艺术创作', statsEn: 'Cinematic Art' },
+            { id: 'more', titleCn: 'MORE', titleEn: 'MORE', statsCn: '第二视界', statsEn: 'Second Horizon' }
+        ];
+
+        const galleryImages = [
+  "https://i.ibb.co/fzs1SKtP/compressed.jpg",
+  "https://i.ibb.co/prG66rGs/compressed.jpg",
+  "https://i.ibb.co/LwbKRPB/compressed-1.jpg",
+  "https://i.ibb.co/HDhw0T2f/compressed-seedream-4-high-res-fal-b-A-black-car-is-parke.jpg",
+  "https://i.ibb.co/4wsQGtrG/compressed-see-dream4.jpg",
+  "https://i.ibb.co/RGvfr4Bs/compressed-retouch-2024093020205305.jpg",
+  "https://i.ibb.co/prsM5rzR/compressed-retouch-2024093020202954.jpg",
+  "https://i.ibb.co/hJQJmXJG/compressed-retouch-2024093020200828.jpg",
+  "https://i.ibb.co/v6cjD0Nr/compressed-retouch-2024093020185078.jpg",
+  "https://i.ibb.co/Y7vzvs1x/compressed-retouch-2024041023271366.jpg",
+  "https://i.ibb.co/JWJPNTWN/compressed-retouch-2024030112544775.jpg",
+  "https://i.ibb.co/HTCHqjPD/compressed-retouch-2024012919414161.jpg",
+  "https://i.ibb.co/0pk5h3Rc/compressed-retouch-2023071716500659.jpg",
+  "https://i.ibb.co/FLZTNtmT/compressed-retouch-2022101021113505.jpg",
+  "https://i.ibb.co/hJZbp1DG/compressed-mmexport1679835284179-2.jpg",
+  "https://i.ibb.co/5XXf75P5/compressed-mmexport1676347429109.jpg",
+  "https://i.ibb.co/8gW4wsQr/compressed-mmexport1667478647462.jpg",
+  "https://i.ibb.co/9H5M4hGd/compressed-mmexport1667139486483.jpg",
+  "https://i.ibb.co/ZzVXt27v/compressed-mmexport1666789117344.jpg",
+  "https://i.ibb.co/p6TG9CDJ/compressed-mmexport1665577080323.jpg",
+  "https://i.ibb.co/39ZS3zHV/compressed-mmexport1665486944342.jpg",
+  "https://i.ibb.co/B5PZSzqN/compressed-mmexport1663665828609.jpg",
+  "https://i.ibb.co/7dwtQVhL/compressed-mmexport1663567113446.jpg",
+  "https://i.ibb.co/SDSqf6s9/compressed-mmexport1662365711994.jpg",
+  "https://i.ibb.co/wrdtWmP6/compressed-mmexport1662089036630.jpg",
+  "https://i.ibb.co/XrjyLqdq/compressed-mmexport1661494200585.jpg",
+  "https://i.ibb.co/JWhQkyzK/compressed-mmexport1661306645553.jpg",
+  "https://i.ibb.co/RGgJnpVd/compressed-mmexport1661230124367.jpg",
+  "https://i.ibb.co/0Vy0TmfW/compressed-gemini-3-pro-image-preview-nano-banana-pro-b-A-car-was-parked-at.jpg",
+  "https://i.ibb.co/SD2N50rT/compressed-gemini-3-pro-image-preview-nano-banana-pro-a-Generate-a-vehicle-i.jpg",
+  "https://i.ibb.co/1Y82JYKk/compressed-gemini-3-pro-image-preview-nano-banana-pro-a-A-car-was-parked-at.jpg",
+  "https://i.ibb.co/nsy012Dq/compressed-gemini-3-pro-image-preview-nano-banana-pro-a-A-car-was-parked-at-1.jpg",
+  "https://i.ibb.co/rfsjv5KG/compressed-gemini-3-pro-image-preview-nano-banana-pro-a-A-black-car-parked-u.jpg",
+  "https://i.ibb.co/23MXRcFj/compressed-gemini-3-pro-image-preview-nano-banana-pro-a-A-black-car-is-parke.jpg",
+  "https://i.ibb.co/Y71wsZGf/compressed-dbfd0b132c9d8de92preview-jpeg-tplv-a9rns2rl98-image-pre-watermark-1-5.jpg",
+  "https://i.ibb.co/8DDPqLbR/compressed-d16b935ee87848eaa3a6b97041447d7b-jpeg-tplv-a9rns2rl98-image-raw.jpg",
+  "https://i.ibb.co/0yJHLjdB/compressed-banana1.jpg",
+  "https://i.ibb.co/XkfQ2jY3/compressed-banana-pro.jpg",
+  "https://i.ibb.co/84XV0xxk/compressed-Wechat-IMG528.jpg",
+  "https://i.ibb.co/LXGftxSW/compressed-Wechat-IMG527.jpg",
+  "https://i.ibb.co/YBmvGqFD/compressed-Wechat-IMG462.jpg",
+  "https://i.ibb.co/yxhm90N/compressed-Wechat-IMG461.jpg",
+  "https://i.ibb.co/7ddGFhPQ/compressed-Wechat-IMG460.jpg",
+  "https://i.ibb.co/B2tGtGkY/compressed-Wechat-IMG459.jpg",
+  "https://i.ibb.co/w17Kkmm/compressed-Wechat-IMG458.jpg",
+  "https://i.ibb.co/8nw5cCB4/compressed-Screenshot-2024-09-30-20-06-13-679-com-miui-gallery-edit.jpg",
+  "https://i.ibb.co/35p8GXp0/compressed-Screenshot-2024-09-30-20-05-27-322-com-miui-gallery-edit.jpg",
+  "https://i.ibb.co/P0BSZzd/compressed-Screenshot-2024-09-30-20-04-57-027-com-miui-gallery-edit.jpg",
+  "https://i.ibb.co/sd0JY2JL/compressed-Screenshot-2024-09-30-20-04-34-925-com-miui-gallery-edit.jpg",
+  "https://i.ibb.co/JWxGSqzS/compressed-Screenshot-2024-09-30-19-51-07-359-com-miui-gallery-edit.jpg",
+  "https://i.ibb.co/TMJ9Yd5X/compressed-Screenshot-2024-09-30-19-50-36-300-com-miui-gallery-edit.jpg",
+  "https://i.ibb.co/Kjd7LHcR/compressed-Screenshot-2024-09-30-19-50-12-255-com-miui-gallery-edit.jpg",
+  "https://i.ibb.co/4nDV2pR3/compressed-IMG-20240930-201111.jpg",
+  "https://i.ibb.co/Zz7MmGVp/compressed-IMG-20240930-201100.jpg",
+  "https://i.ibb.co/j9WVL8Qp/compressed-IMG-20240930-201050.jpg",
+  "https://i.ibb.co/xvpSxFs/compressed-IMG-20240930-201038.jpg",
+  "https://i.ibb.co/FLFjXF6f/compressed-IMG-20240930-201029.jpg",
+  "https://i.ibb.co/jZ4XvtCq/compressed-IMG-20240930-201018.jpg",
+  "https://i.ibb.co/YFTrfHgg/compressed-IMG-20240930-201009.jpg",
+  "https://i.ibb.co/DfccjLvJ/compressed-IMG-20240930-200955.jpg",
+  "https://i.ibb.co/XxBy1fMd/compressed-IMG-20240930-200945.jpg",
+  "https://i.ibb.co/QF4Ktw52/compressed-IMG-20240930-200934.jpg",
+  "https://i.ibb.co/0Rfk0RZF/compressed-IMG-20240930-195402.jpg",
+  "https://i.ibb.co/ZpxsfPTW/compressed-IMG-20240930-195346.jpg",
+  "https://i.ibb.co/FkT7qY6n/compressed-IMG-20240930-195332.jpg",
+  "https://i.ibb.co/C5YHk8h2/compressed-IMG-20240930-195317.jpg",
+  "https://i.ibb.co/RpcfMn3N/compressed-IMG-20240930-195305.jpg",
+  "https://i.ibb.co/Kp1Yk315/compressed-IMG-20221009-144255-2.jpg",
+  "https://i.ibb.co/ZzMfC6gx/compressed-65b3f11ffa4b41fc89f9699afacb97ae-jpeg-tplv-a9rns2rl98-image-raw.jpg",
+  "https://i.ibb.co/zHWcZ0Ts/compressed-4d9e880fff40415b99221d1f969989ce-jpeg-tplv-a9rns2rl98-image-raw.jpg",
+  "https://i.ibb.co/KHfm9Tf/compressed-34998323-f856b6ba15520c138924a64d5fe4c571933e09141425c450f7e49bce3c19fee8.jpg",
+  "https://i.ibb.co/s9VMRfJk/compressed-289979787-ed0d6f6636a02db901b3867a9cc24570950fbf3abc3c0bc51058a8a15b58c4cc.jpg",
+  "https://i.ibb.co/Kj0ypPGc/compressed-2335975e6597a2d56a46af1547bf275d265018111b10badb297d3896871c6c1b.jpg",
+  "https://i.ibb.co/HDftYGDJ/compressed-1766382198235.jpg",
+  "https://i.ibb.co/zWRZ0HJm/compressed-1766382198208.jpg",
+  "https://i.ibb.co/HfcXDGqh/compressed-1766382198198.jpg",
+  "https://i.ibb.co/Z1FvznFw/compressed-1766382198187.jpg",
+  "https://i.ibb.co/s9tsX4vG/compressed-1766382198176.jpg",
+  "https://i.ibb.co/vCsCvgZx/compressed-1766382198166.jpg",
+  "https://i.ibb.co/d10qYsX/compressed-1766382198156.jpg",
+  "https://i.ibb.co/xSxs5XQg/compressed-1766382198086.jpg",
+  "https://i.ibb.co/qMrDJYkB/compressed-1766382198076.jpg",
+  "https://i.ibb.co/ZpBxZXjg/compressed-1766382198048.jpg",
+  "https://i.ibb.co/xKz8QYFs/compressed-1766382198029.jpg",
+  "https://i.ibb.co/VWq5614m/compressed-1766382198019.jpg",
+  "https://i.ibb.co/mVSLmxSz/compressed-1766382197999.jpg",
+  "https://i.ibb.co/jkpyCntr/compressed-1766382197990.jpg",
+  "https://i.ibb.co/fdX4KTNd/compressed-1766382197979.jpg",
+  "https://i.ibb.co/Lh2GgTnk/compressed-1766382197960.jpg",
+  "https://i.ibb.co/Lz6f3K5q/compressed-1766382197950.jpg",
+  "https://i.ibb.co/F4sd9z46/compressed-1766382197932.jpg",
+  "https://i.ibb.co/5xzxBPHv/compressed-1766382197922.jpg",
+  "https://i.ibb.co/6RND0S6V/compressed-1766382197893.jpg",
+  "https://i.ibb.co/nsVXcc9s/compressed-1766382197873.jpg",
+  "https://i.ibb.co/JRv06pnF/compressed-1766382197861.jpg",
+  "https://i.ibb.co/vrr9Kcv/compressed-1766382197839.jpg",
+  "https://i.ibb.co/8n1x3m86/compressed-1766382197829.jpg",
+  "https://i.ibb.co/b5NTB4zJ/compressed-1766382197819.jpg",
+  "https://i.ibb.co/9P1L94D/compressed-1766382197809.jpg",
+  "https://i.ibb.co/xqRx26RM/compressed-1766382197788.jpg",
+  "https://i.ibb.co/sdfMSyRN/compressed-1766382197778.jpg",
+  "https://i.ibb.co/HfktTRdN/compressed-1766382197768.jpg",
+  "https://i.ibb.co/SDgJ1FSW/compressed-1766382197738.jpg",
+  "https://i.ibb.co/BVxNTvvD/compressed-1766382197675.jpg",
+  "https://i.ibb.co/Jj9Fc9SK/compressed-1766382197646.jpg",
+  "https://i.ibb.co/qfBLf73/compressed-1766382197636.jpg",
+  "https://i.ibb.co/BHyv7RFC/compressed-1766382197627.jpg",
+  "https://i.ibb.co/bjVnHLNQ/compressed-1766382197618.jpg",
+  "https://i.ibb.co/Ld8ycfVS/compressed-1766382197609.jpg",
+  "https://i.ibb.co/TxrKjPtt/compressed-1766382197599.jpg",
+  "https://i.ibb.co/zWDjh3G1/compressed-1766382197570.jpg",
+  "https://i.ibb.co/zHS0mvTq/compressed-1766382197715.jpg" 
+        ];
+
+        // --- STATE & LOGIC ---
+        let currentLang = 'cn';
+        let expandedExpIds = ['exp1'];
+        let playingVideoId = null;
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            renderContent();
+            initCanvas();
+            initTypewriter();
+            renderSkills();
+            renderExperience();
+            renderAwards();
+            renderCarousel();
+            renderGallery();
+            initBackToTop();
+            initSkillAnimation();
+            
+            // Mouse Interaction
+            document.addEventListener('mousemove', (e) => {
+                document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
+                document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
+                
+                // Card spotlight effect
+                document.querySelectorAll('.glass-card').forEach(card => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    card.style.setProperty('--card-mouse-x', `${x}px`);
+                    card.style.setProperty('--card-mouse-y', `${y}px`);
+                });
+            });
+
+            // Lang Toggle
+            document.getElementById('lang-toggle').addEventListener('click', () => {
+                currentLang = currentLang === 'cn' ? 'en' : 'cn';
+                renderContent();
+            });
+
+            // Exp Toggle
+            document.getElementById('exp-toggle-all').addEventListener('click', () => {
+                if(expandedExpIds.length === experienceData.length) expandedExpIds = [];
+                else expandedExpIds = experienceData.map(e => e.id);
+                renderExperience();
+            });
+            
+            // Input Enter
+             document.getElementById('guestbook-input').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                  sendToBlackHole();
+                }
+            });
+        });
+
+        function renderContent() {
+            const t = LANG[currentLang];
+            document.getElementById('lang-text').innerText = t.toggle;
+            document.getElementById('hero-name').innerText = t.heroName;
+            document.getElementById('hero-desc').innerText = t.heroDesc;
+            document.getElementById('core-title').innerText = t.coreTitle;
+            document.getElementById('core-text').innerHTML = t.coreText;
+            document.getElementById('stats-text').innerText = t.statsText;
+            document.getElementById('exp-toggle-all').innerText = expandedExpIds.length === experienceData.length ? t.expToggleFold : t.expToggle;
+            document.getElementById('guestbook-input').placeholder = t.gbPlaceholder;
+            
+            // Labels
+            document.getElementById('title-skill').innerText = t.labelSkill;
+            document.getElementById('title-exp').innerText = t.labelExp;
+            document.getElementById('title-awards').innerText = t.labelAwards;
+            document.getElementById('label-contact').innerText = t.labelContact;
+            
+            // Nav
+            document.querySelectorAll('nav a[data-cn]').forEach(el => {
+                el.innerText = currentLang === 'cn' ? el.getAttribute('data-cn') : el.getAttribute('data-en');
+            });
+            
+            // Re-render Dynamic lists
+            renderExperience();
+            renderAwards();
+            renderCarouselCardsOnly(); // Do not re-bind all events
+        }
+
+        function renderSkills() {
+            const container = document.getElementById('skills-container');
+            container.innerHTML = skillsData.map(s => `
+                <div>
+                    <div class="flex justify-between text-[10px] font-mono text-gray-500 mb-1">
+                        <span>${s.name}</span><span class="${s.highlight?'text-brand-cyan':''}">${s.level}%</span>
+                    </div>
+                    <div class="h-[1px] bg-gray-900 w-full overflow-hidden">
+                        <div class="h-full skill-bar ${s.highlight?'bg-brand-cyan shadow-[0_0_10px_#00F2FF]':'bg-white'}" style="width: ${s.level}%" data-width="${s.level}%"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function initSkillAnimation() {
+            const skillCard = document.getElementById('skill');
+            skillCard.addEventListener('mouseenter', () => {
+                const bars = skillCard.querySelectorAll('.skill-bar');
+                bars.forEach(bar => {
+                    bar.style.transition = 'none';
+                    bar.style.width = '0';
+                    // Force reflow
+                    void bar.offsetWidth;
+                    bar.style.transition = 'width 1s cubic-bezier(0.22, 1, 0.36, 1)';
+                    bar.style.width = bar.getAttribute('data-width');
+                });
+            });
+        }
+
+        function renderExperience() {
+            const container = document.getElementById('experience-container');
+            const isCn = currentLang === 'cn';
+            container.innerHTML = experienceData.map(item => {
+                const isExpanded = expandedExpIds.includes(item.id);
+                const descList = isCn ? item.descCn : item.descEn;
+                const company = isCn ? item.companyCn : item.companyEn;
+                const title = isCn ? item.titleCn : item.titleEn;
+                
+                return `
+                <div class="pl-4 border-l transition-colors cursor-pointer ${isExpanded ? 'border-brand-cyan' : 'border-gray-800'}" onclick="toggleExp('${item.id}')">
+                    <div class="flex justify-between mb-1">
+                        <h4 class="text-white text-sm font-bold hover:text-brand-cyan transition-colors">${company}</h4>
+                        <span class="text-[10px] font-mono text-gray-500">${item.period}</span>
+                    </div>
+                    <div class="text-xs text-gray-400 mb-2">${title}</div>
+                    ${isExpanded ? `
+                        <ul class="mt-2 space-y-1 fade-in">
+                            ${descList.map(d => `<li class="text-[10px] text-gray-500 list-disc list-inside">${d}</li>`).join('')}
+                        </ul>
+                    ` : ''}
+                </div>`;
+            }).join('');
+            
+            const t = LANG[currentLang];
+            document.getElementById('exp-toggle-all').innerText = expandedExpIds.length === experienceData.length ? t.expToggleFold : t.expToggle;
+        }
+
+        function renderAwards() {
+            const container = document.getElementById('awards-list');
+            const isCn = currentLang === 'cn';
+            container.innerHTML = awardsData.map(item => `
+                <div class="border-l border-gray-800 pl-4 hover:border-brand-cyan transition-colors group/award">
+                    <h4 class="text-white text-xs font-bold group-hover/award:text-brand-cyan transition-colors">${isCn ? item.titleCn : item.titleEn}</h4>
+                    <p class="text-[10px] text-gray-500 font-mono mt-0.5">${isCn ? item.descCn : item.descEn}</p>
+                </div>
+            `).join('');
+        }
+
+        window.toggleExp = (id) => {
+            if(expandedExpIds.includes(id)) expandedExpIds = expandedExpIds.filter(i => i !== id);
+            else expandedExpIds.push(id);
+            renderExperience();
+        };
+
+        // --- CAROUSEL LOGIC ---
+
+        function renderCarouselCardsOnly() {
+            const container = document.getElementById('carousel-container');
+            const isCn = currentLang === 'cn';
+            
+            // Save scroll position
+            const scrollLeft = container.scrollLeft;
+
+            // Generate HTML string for cards
+            const cardsHtml = workItems.map((item, idx) => {
+                if(item.id === 'more') {
+                    return `
+                    <div class="carousel-card relative flex-shrink-0 w-[400px] aspect-video rounded-xl overflow-hidden glass-card transition-all duration-500 ease-out border border-white/5 bg-black cursor-pointer scan-shine card-overflow-hidden" onclick="togglePage('second')" draggable="false">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center bg-white/5 backdrop-blur-md pointer-events-none">
+                            <h2 class="text-6xl font-mono font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/20 tracking-widest uppercase">MORE</h2>
+                        </div>
+                    </div>`;
+                }
+                const title = isCn ? item.titleCn : item.titleEn;
+                const stats = isCn ? item.statsCn : item.statsEn;
+                const isPlaying = playingVideoId === idx;
+
+                return `
+                <div class="carousel-card relative flex-shrink-0 w-[400px] aspect-video rounded-xl overflow-hidden glass-card transition-all duration-500 ease-out border border-white/5 bg-black scan-shine card-overflow-hidden" id="card-${idx}" draggable="false">
+                    ${isPlaying ? `
+                        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${item.id}?autoplay=1" frameBorder="0" allow="autoplay; encrypted-media" class="absolute inset-0 w-full h-full"></iframe>
+                    ` : `
+                        <img src="https://i.ytimg.com/vi/${item.id}/hqdefault.jpg" class="absolute inset-0 w-full h-full object-cover pointer-events-none" draggable="false">
+                        <div onclick="playVideo(event, ${idx})" class="absolute inset-0 z-30 flex items-center justify-center cursor-pointer group/play">
+                             <div class="w-16 h-16 bg-brand-cyan/20 backdrop-blur-md rounded-full flex items-center justify-center border border-brand-cyan/50 opacity-0 group-hover/play:opacity-100 transition-opacity hover:scale-110 duration-300 shadow-[0_0_15px_rgba(0,242,255,0.3)]">
+                                <svg class="w-8 h-8 text-brand-cyan ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black to-transparent z-20 pointer-events-none">
+                            <h4 class="text-white font-mono text-lg">${title}</h4>
+                            <span class="text-[10px] text-brand-cyan font-mono uppercase tracking-widest">${stats}</span>
+                        </div>
+                    `}
+                </div>`;
+            }).join('');
+
+            container.innerHTML = cardsHtml;
+            container.scrollLeft = scrollLeft;
+        }
+
+        function renderCarousel() {
+            renderCarouselCardsOnly();
+            const dotsContainer = document.getElementById('carousel-dots');
+            
+            // Render Dots
+            dotsContainer.innerHTML = workItems.map((_, i) => `<div class="w-2 h-2 rounded-full bg-gray-600 transition-all cursor-pointer hover:scale-125" id="dot-${i}" onclick="scrollToCard(${i})"></div>`).join('');
+            
+            // --- Advanced Interactions ---
+            const container = document.getElementById('carousel-container');
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+            let isDragging = false; // To distinguish drag vs click
+
+            // 1. Card Dragging
+            container.addEventListener('mousedown', (e) => {
+                isDown = true;
+                isDragging = false;
+                container.style.cursor = 'grabbing';
+                startX = e.pageX - container.offsetLeft;
+                scrollLeft = container.scrollLeft;
+            });
+
+            const stopDrag = () => {
+                if(!isDown) return;
+                isDown = false;
+                container.style.cursor = 'grab';
+                snapToNearest();
+                setTimeout(() => isDragging = false, 50); // Small buffer
+            };
+
+            container.addEventListener('mouseleave', stopDrag);
+            container.addEventListener('mouseup', stopDrag);
+
+            container.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - container.offsetLeft;
+                const walk = (x - startX) * 2; // Scroll speed multiplier
+                if(Math.abs(walk) > 5) isDragging = true; // Threshold for drag detection
+                container.scrollLeft = scrollLeft - walk;
+            });
+
+            // 2. Snap Logic
+            function snapToNearest() {
+                const center = container.scrollLeft + container.clientWidth / 2;
+                const cards = container.querySelectorAll('.carousel-card');
+                let closest = null;
+                let minDst = Infinity;
+
+                cards.forEach(card => {
+                    const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+                    const dist = Math.abs(center - cardCenter);
+                    if(dist < minDst) {
+                        minDst = dist;
+                        closest = card;
+                    }
+                });
+
+                if(closest) {
+                    // Center the closest card
+                    const target = closest.offsetLeft - container.clientWidth / 2 + closest.offsetWidth / 2;
+                    container.scrollTo({ left: target, behavior: 'smooth' });
+                }
+            }
+
+            // Expose scrollToCard for dots
+            window.scrollToCard = (index) => {
+                const cards = container.querySelectorAll('.carousel-card');
+                if(cards[index]) {
+                     const target = cards[index].offsetLeft - container.clientWidth / 2 + cards[index].offsetWidth / 2;
+                     container.scrollTo({ left: target, behavior: 'smooth' });
+                }
+            };
+
+            // 4. 3D Vis Logic Loop
+            const update3D = () => {
+                const center = container.scrollLeft + container.clientWidth / 2;
+                const cards = container.querySelectorAll('.carousel-card');
+                
+                cards.forEach((el, index) => {
+                    const cardCenter = el.offsetLeft + el.offsetWidth / 2;
+                    const dist = (center - cardCenter) / (el.offsetWidth * 0.75); 
+                    const absDist = Math.abs(dist);
+                    
+                    const scale = Math.max(0.85, 1 - absDist * 0.2);
+                    const rotateY = dist * -30;
+                    const zIndex = 100 - Math.round(absDist * 10);
+                    const opacity = Math.max(0.4, 1 - absDist * 0.7);
+                    
+                    el.style.transform = `perspective(1000px) rotateY(${rotateY}deg) scale(${scale})`;
+                    el.style.zIndex = zIndex;
+                    el.style.opacity = opacity;
+                    
+                    const dot = document.getElementById(`dot-${index}`);
+                    if (absDist < 0.35) {
+                        el.classList.add('is-center');
+                        el.style.filter = 'grayscale(0%)';
+                        if(dot) {
+                            dot.classList.remove('bg-gray-600');
+                            dot.classList.add('bg-brand-cyan', 'scale-125');
+                        }
+                    } else {
+                        el.classList.remove('is-center');
+                        el.style.filter = 'grayscale(100%)';
+                         if(dot) {
+                            dot.classList.remove('bg-brand-cyan', 'scale-125');
+                            dot.classList.add('bg-gray-600');
+                        }
+                    }
+                });
+                requestAnimationFrame(update3D);
+            };
+            requestAnimationFrame(update3D);
+        }
+
+        window.playVideo = (e, index) => {
+            e.stopPropagation(); // Prevent card click
+            playingVideoId = index;
+            renderCarouselCardsOnly();
+        };
+
+        // --- EXTRAS ---
+        function initTypewriter() {
+            const el = document.getElementById('typewriter-text');
+            let currentText = '';
+            let isDeleting = false;
+            
+            const loop = () => {
+                const fullText = LANG[currentLang].heroTypewriter;
+                if(isDeleting) {
+                    currentText = fullText.substring(0, currentText.length - 1);
+                } else {
+                    currentText = fullText.substring(0, currentText.length + 1);
+                }
+                
+                el.innerText = currentText;
+                
+                let delta = isDeleting ? 30 : 100;
+                
+                if (!isDeleting && currentText === fullText) {
+                    delta = 2000;
+                    isDeleting = true;
+                } else if (isDeleting && currentText === '') {
+                    isDeleting = false;
+                    delta = 500;
+                }
+                
+                setTimeout(loop, delta);
+            };
+            loop();
+        }
+
+        window.toggleEmail = () => {
+            document.getElementById('email-popup').classList.toggle('hidden');
+        }
+
+        window.copyText = (text, btn) => {
+            navigator.clipboard.writeText(text);
+            const originalIcon = btn.innerHTML;
+            // Checkmark Icon
+            btn.innerHTML = '<svg class="w-3 h-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>';
+            setTimeout(() => {
+                btn.innerHTML = originalIcon;
+            }, 2000);
+        }
+
+        function initBackToTop() {
+            const btn = document.getElementById('back-to-top');
+            window.addEventListener('scroll', () => {
+                if(window.scrollY > 300) {
+                    btn.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-10');
+                } else {
+                    btn.classList.add('opacity-0', 'pointer-events-none', 'translate-y-10');
+                }
+            });
+        }
+
+        function renderGallery() {
+            const g = document.getElementById('gallery-grid');
+            g.innerHTML = galleryImages.map(url => `
+                <div class="break-inside-avoid glass-card rounded-xl overflow-hidden group mb-6 animate-float-1">
+                    <img src="${url}" class="w-full h-auto grayscale group-hover:grayscale-0 transition-all duration-700" loading="lazy">
+                </div>
+            `).join('');
+        }
+
+        window.togglePage = (page) => {
+            const main = document.getElementById('main-content');
+            const sec = document.getElementById('second-page');
+            if(page === 'second') {
+                main.classList.add('hidden');
+                sec.classList.remove('hidden');
+                sec.classList.add('fade-in');
+            } else {
+                sec.classList.add('hidden');
+                main.classList.remove('hidden');
+                main.classList.add('fade-in');
+            }
+            window.scrollTo(0,0);
+        }
+
+        // --- BLACK HOLE GUESTBOOK ---
+        window.sendToBlackHole = () => {
+            const input = document.getElementById('guestbook-input');
+            const text = input.value.trim();
+            const status = document.getElementById('gb-status');
+            
+            if(!text) return;
+
+            // 1. Create Floating Particle Message
+            const particle = document.createElement('div');
+            particle.innerText = text;
+            particle.className = 'message-particle';
+            
+            // Randomize position within the black hole accretion disk area
+            // Approx central 40% of the card area
+            const randomX = 30 + Math.random() * 40; // 30% to 70%
+            const randomY = 30 + Math.random() * 40; // 30% to 70%
+            
+            particle.style.left = `${randomX}%`;
+            particle.style.top = `${randomY}%`;
+            
+            // Add random initial rotation for more chaos
+            const randomRot = Math.random() * 360;
+            particle.style.transform = `translate(-50%, -50%) rotate(${randomRot}deg)`;
+            
+            document.getElementById('particle-container').appendChild(particle);
+            
+            // Remove after animation (10s)
+            setTimeout(() => {
+                particle.remove();
+            }, 10000);
+
+            // 2. Clear Input
+            input.value = '';
+            
+            // 3. UI Feedback
+            const messages = currentLang === 'cn' 
+                ? ["信息已捕获...", "正在跨越视界...", "已永久存入奇点"] 
+                : ["Message Captured...", "Crossing Horizon...", "Stored in Singularity"];
+            
+            let i = 0;
+            const timer = setInterval(() => {
+                status.innerText = messages[i];
+                i++;
+                if(i >= messages.length) {
+                    clearInterval(timer);
+                    setTimeout(() => {
+                        status.innerText = "EVENT HORIZON";
+                    }, 2000);
+                }
+            }, 800);
+        }
+
+        // --- CANVAS (METEORS) ---
+        function initCanvas() {
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let stars = [], meteors = [], nebulas = [];
+            
+            // Resizing
+            const resize = () => {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+                initEntities();
+            };
+            window.addEventListener('resize', resize);
+            
+            // Classes
+            class Star {
+                constructor() { this.reset(); }
+                reset() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.z = Math.random() * width;
+                    this.size = (1 - this.z/width) * 1.5;
+                    this.opacity = (1 - this.z/width);
+                }
+                draw() {
+                    ctx.fillStyle = `rgba(255,255,255,${this.opacity})`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+                    ctx.fill();
+                }
+            }
+            
+            class Meteor {
+                constructor() { 
+                    this.reset();
+                }
+                reset() {
+                    this.len = Math.random() * 80 + 20;
+                    this.speed = Math.random() * 10 + 5;
+                    this.active = true;
+                    
+                    // Random Side: 0:Top, 1:Right, 2:Bottom, 3:Left
+                    const side = Math.floor(Math.random() * 4);
+                    
+                    if(side === 0) { // Top -> Down/Random
+                        this.x = Math.random() * width;
+                        this.y = -100;
+                        this.angle = Math.PI/4 + (Math.random() - 0.5); 
+                    } else if (side === 1) { // Right -> Left/Random
+                        this.x = width + 100;
+                        this.y = Math.random() * height;
+                        this.angle = Math.PI + (Math.random() - 0.5);
+                    } else if (side === 2) { // Bottom -> Up/Random
+                        this.x = Math.random() * width;
+                        this.y = height + 100;
+                        this.angle = -Math.PI/2 + (Math.random() - 0.5);
+                    } else { // Left -> Right/Random
+                        this.x = -100;
+                        this.y = Math.random() * height;
+                        this.angle = 0 + (Math.random() - 0.5);
+                    }
+                }
+                update() {
+                    this.x += this.speed * Math.cos(this.angle);
+                    this.y += this.speed * Math.sin(this.angle);
+                    
+                    if(this.x < -200 || this.x > width + 200 || this.y < -200 || this.y > height + 200) {
+                        this.active = false;
+                    }
+                }
+                draw() {
+                    // Pure White
+                    ctx.strokeStyle = `rgba(255, 255, 255, 0.6)`;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(this.x - this.len * Math.cos(this.angle), this.y - this.len * Math.sin(this.angle));
+                    ctx.stroke();
+                }
+            }
+
+            function initEntities() {
+                stars = Array(100).fill().map(() => new Star());
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+                stars.forEach(s => s.draw());
+                
+                // Much lower frequency (0.005)
+                if(Math.random() < 0.005) meteors.push(new Meteor());
+                meteors.forEach((m, i) => {
+                    m.update();
+                    m.draw();
+                    if(!m.active) meteors.splice(i, 1);
+                });
+                
+                requestAnimationFrame(animate);
+            }
+            
+            resize();
+            animate();
+        }
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
