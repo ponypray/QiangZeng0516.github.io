@@ -1,0 +1,174 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Space Grotesk", ui-monospace, SFMono-Regular, monospace;
+
+  --color-brand-black: #030303;
+  --color-brand-dark: #0A0A0A;
+  --color-brand-gray: #888888;
+  --color-brand-cyan: #00F2FF;
+
+  --animate-pulse-glow: pulse-glow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-typewriter: blink 1s step-end infinite;
+  --animate-scan: scan 0.8s ease-in-out;
+  --animate-spin-slow: spin-slow 20s linear infinite;
+  --animate-suck-in: suckIn 1.5s ease-in forwards;
+  --animate-float-1: float 6s ease-in-out infinite;
+  --animate-float-2: float 7s ease-in-out infinite 1s;
+  --animate-float-3: float 8s ease-in-out infinite 2s;
+  --animate-drift: drift 10s linear forwards;
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); }
+    50% { opacity: 0.6; box-shadow: 0 0 20px rgba(0, 242, 255, 0.6); }
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  @keyframes scan {
+    0% { left: -150px; opacity: 1; }
+    100% { left: 120%; opacity: 1; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes drift {
+    0% { transform: translate(-50%, -50%) scale(0.8) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(5deg); }
+    90% { opacity: 0.8; transform: translate(-50%, -60%) scale(0.5) rotate(45deg); }
+    100% { transform: translate(-50%, -80%) scale(0) rotate(180deg); opacity: 0; }
+  }
+  @keyframes spin-slow {
+      to { transform: rotate(360deg); }
+  }
+}
+
+:root {
+    --mouse-x: 50%;
+    --mouse-y: 50%;
+}
+
+body {
+    background-color: #000000;
+    color: #ffffff;
+    overflow-x: hidden;
+    margin: 0;
+    cursor: default;
+}
+
+/* Utilities */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-brand-cyan); }
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+.glass-card {
+    background: rgba(15, 15, 15, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.card-overflow-hidden {
+    overflow: hidden;
+}
+
+/* Scan Effect - FORCE VISIBILITY */
+.scan-shine {
+    position: relative;
+    overflow: hidden;
+}
+.scan-shine::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150px;
+    width: 100px;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transform: skewX(-20deg);
+    pointer-events: none;
+    z-index: 20;
+    opacity: 0;
+}
+.scan-shine:hover::after {
+    animation: scan 1s ease-in-out;
+}
+
+/* Carousel */
+.carousel-card {
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease, filter 0.5s ease;
+    filter: grayscale(100%);
+    opacity: 0.4;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+.carousel-card.is-center {
+    filter: grayscale(0%);
+    opacity: 1;
+    box-shadow: 0 0 40px rgba(0, 242, 255, 0.15);
+    z-index: 50 !important;
+}
+
+/* Glow Effects */
+.glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(400px circle at var(--card-mouse-x, 50%) var(--card-mouse-y, 50%), rgba(0, 242, 255, 0.1), transparent 40%);
+    opacity: 0; transition: opacity 0.3s;
+    pointer-events: none; z-index: 1;
+}
+.glass-card:hover::before { opacity: 1; }
+
+.global-glow {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 1;
+    background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(0, 242, 255, 0.03), transparent 80%);
+}
+
+.cursor-blink {
+    display: inline-block; width: 2px; height: 1em; background: var(--color-brand-cyan);
+    margin-left: 4px; vertical-align: bottom; animation: blink 1s infinite;
+}
+
+.dynamic-island {
+    background: rgba(10, 10, 10, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Black Hole Animation */
+.black-hole-spin { animation: spin-slow 20s linear infinite; }
+
+/* Floating Message in Black Hole */
+.message-particle {
+    position: absolute;
+    color: rgba(0, 242, 255, 0.9);
+    font-family: 'Space Grotesk', monospace;
+    font-size: 11px;
+    pointer-events: none;
+    white-space: nowrap;
+    text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+    animation: drift 10s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    z-index: 15;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Skill Bar Animation Class */
+.skill-fill-anim {
+    transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
