@@ -1,0 +1,7 @@
+{
+  "name": "Qiang Zeng | AIGC Portfolio",
+  "description": "Interactive AIGC portfolio featuring Gemini-powered audio transcription.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
